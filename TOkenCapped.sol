@@ -1,13 +1,19 @@
 //SPDX-License-Identifier: MIT
 pragma solidity ^0.8.13;
+import "@openzeppelin/contracts/token/ERC20/presets/ERC20PresetMinterPauser.sol";
 import "@openzeppelin/contracts/token/ERC20/extensions/ERC20Capped.sol";
-contract TOkenCapped is ERC20Capped {
-    
-    constructor() ERC20("Capped Token","CTP") ERC20Capped(10000000000 * (10 ** uint256(decimals()))) {
-      
+import "@openzeppelin/contracts/utils/math/SafeMath.sol";
+contract KoletToken is ERC20PresetMinterPauser, ERC20Capped{
+    using SafeMath for uint256;
+    constructor(string memory tokenName, string memory tokenSymbol, uint256 supply, address beneficiary) public ERC20PresetMinterPauser(tokenName,tokenSymbol) ERC20Capped(SafeMath.mul(supply,1 ether)) {
+        _mint(beneficiary, SafeMath.mul(supply,1 ether));
     }
-      function mint(address account, uint256 amount) public  {
+    function _beforeTokenTransfer(address from, address to, uint256 amount) internal virtual override(ERC20,ERC20PresetMinterPauser) {
+        super._beforeTokenTransfer(from, to, amount);
+    }
+           function _mint(address account, uint256 amount) internal virtual override( ERC20, ERC20Capped) {
         require(totalSupply() + amount <= cap(), "ERC20Capped: cap exceeded");
         super._mint(account, amount);
     }
-} 
+ 
+}
